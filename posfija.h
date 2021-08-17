@@ -38,5 +38,6 @@ void eliminar_pila(PILA *pila);
 int determinar_prioridad(char caracter);
 void imprimir_cola(COLA* cola);
 void evaluar_cadena(COLA* cola);
-void escribir_Cola_Archivo(COLA* cola);
+bool guardar_cadena(COLA* cola);
+
 #endif

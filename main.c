@@ -1,88 +1,53 @@
 #include "posfija.h"
 
-void guardar_CadenaPosfija(COLA *Posfija){
-        char answer;
-      printf("\n¿Deseas guardar la cadena posfija en un archivo?[s/n]\n");
-      answer = getchar();
-      if(answer == 's'){
-        printf("Guardando cadena posfija");
-        escribir_Cola_Archivo(Posfija);
-      }
-      else{
-        printf("Cadena posfija no fue guardada");
-      }
-}
-
 int main(int argc, char *argv[])
 {
-    //Asignamos el arreglo que guardará las cadena y le asignamos valor
+    //Iniciamos el arreglo que guaradrá el valor de la cadena infija
     char infija[150];
-    int commsCase = 0;
-    // Para los casos en que se debe leer desde el archivo
-    if (argc == 1)
+
+    // Abrimos flujo para tomar los datos del archivo
+    FILE* flujo_infija = fopen("infija.txt", "r");
+
+    if (flujo_infija == NULL)
     {
-        // Abrimos flujo para tomar los datos del archivo
-        FILE* flujo_infija = fopen("infija.txt", "r");
-
-        if (flujo_infija == NULL)
-        {
-            printf("No se encontró el archivo infija.txt\n");
-            return 0;
-        }
-
-        //Usamos un while para leer los caracteres
-        int i = 0;
-        while(feof(flujo_infija) == 0)
-        {
-            fscanf(flujo_infija, "%c", &infija[i]);
-            i++;
-        }
-
-        printf("La cadena infija en el archivo es: %s\n", infija);
-        fclose(flujo_infija);
-
-    }    
-    else{ //Para los casos en que la cadena se paso por linea de comandos
-        commsCase = 1;
-        strcpy(infija, "8+1");
+        printf("No se encontró el archivo %s\n", "infija.txt");
+        return 0;
     }
 
-    //Para los casos en que al cadena esta en un archivo de texto
+    //Usamos un while para leer los caracteres
+    int pos = 0;
+    while(feof(flujo_infija) == 0)
+    {
+        fscanf(flujo_infija, "%c", &infija[pos]);
+        pos++;
+    }
+
+    printf("La cadena infija en el archivo es: %s\n", infija);
+    fclose(flujo_infija);    
     
     //Auxiliares para la creacion de los nodos
     char operador;
     int prioridad;
-    double valor = 0;
     //auxiliar para guardar cadena
-	  PILA* Operadores = crear_pila();
+	PILA* Operadores = crear_pila();
     COLA* Posfija = crear_pila();
 
     //Comenzamos a recorrer la cadena
     for (int i = 0; i < strlen(infija); i++)
     {
         // Si hay espacio en la cadena original, estos no se procesan
-        while(isspace(infija[i]))
+        while(isblank(infija[i]))
             i++;
-        // Los numeros pasan directo a la cadena posfija
-        if (isdigit(infija[i]))
+        // Las variables pasan directo a la cadena posfija
+        if (isalnum(infija[i]))
         {
-            // Para tomar todos los dígitos que componen un numero
-            while (isdigit(infija[i]))
-            {
-                // Se acomoda segun su posicion en notacion 10
-                valor = valor*10;
-                // Obtenemos el valor numérico del caracter a las unidades
-                valor += (infija[i] - '0');
-                i++;
-            }
             //Una vez con el número completo, ese valor se guarda en el nodo
-            encolar(Posfija, 0, '0', valor, false);
-            //Devolvemos el valor a 0
-            valor = 0;
+            encolar(Posfija, 0, infija[i], 0, false);
+            i++;
         }
         
-        // Se vuelven a eliminar los espacio de la cadena
-        while(isspace(infija[i]))
+        // Se vuelven a omitir los espacio de la cadena
+        while(isblank(infija[i]))
             i++;
         
         // Pasamos a evaluar los operadores
@@ -145,11 +110,18 @@ int main(int argc, char *argv[])
     printf("\nLa cadena posfija es: ");
     imprimir_cola(Posfija);
 
-    evaluar_cadena(Posfija);
-    guardar_CadenaPosfija(Posfija);
-	  eliminar_pila(Operadores);
-	  eliminar_pila(Posfija);
+    // El usuario elige acción a realziar con la cadena
+    int eleccion = 0;
+    printf("\nQue accion quieres realizar?\n(1) Guardar cadena\n(2) Evaluar Cadena\n(3) Guardar y evaluar\n");
+    scanf("%d", &eleccion);
+
+    if (eleccion == 1 || eleccion == 3)
+        guardar_cadena(Posfija);
+    if (eleccion == 2 || eleccion == 3)
+        evaluar_cadena(Posfija);
+    
+	eliminar_pila(Operadores);
+	eliminar_pila(Posfija);
 
     return 0;
 }
-
